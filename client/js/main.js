@@ -1,0 +1,153 @@
+// Main JavaScript for the Bookstore Management UI
+
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
+    const bookForm = document.getElementById('book-form');
+    const bookIdInput = document.getElementById('book-id');
+    const titleInput = document.getElementById('title');
+    const authorInput = document.getElementById('author');
+    const isbnInput = document.getElementById('isbn');
+    const priceInput = document.getElementById('price');
+    const saveButton = document.getElementById('save-book');
+    const cancelButton = document.getElementById('cancel-edit');
+    const refreshButton = document.getElementById('refresh-books');
+    const booksTableBody = document.getElementById('books-table-body');
+    const messageArea = document.getElementById('message-area');
+
+    // Load books when page loads
+    loadBooks();
+
+    // Event Listeners
+    refreshButton.addEventListener('click', loadBooks);
+    saveButton.addEventListener('click', saveBook);
+    cancelButton.addEventListener('click', clearForm);
+
+    // Function to load and display all books
+    async function loadBooks() {
+        try {
+            showMessage('Loading books...');
+            const books = await BookstoreAPI.getAllBooks();
+            displayBooks(books);
+            showMessage('Books loaded successfully!', 'success');
+        } catch (error) {
+            showMessage('Failed to load books. ' + error.message, 'error');
+        }
+    }
+
+    // Function to display books in the table
+    function displayBooks(books) {
+        booksTableBody.innerHTML = '';
+        
+        if (books.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="5">No books found</td>';
+            booksTableBody.appendChild(row);
+            return;
+        }
+        
+        books.forEach(book => {
+            const row = document.createElement('tr');
+            
+            row.innerHTML = `
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.isbn}</td>
+                <td>$${parseFloat(book.price).toFixed(2)}</td>
+                <td>
+                    <button class="edit-button" data-id="${book.id}">Edit</button>
+                    <button class="delete-button" data-id="${book.id}">Delete</button>
+                </td>
+            `;
+            
+            booksTableBody.appendChild(row);
+            
+            // Add event listeners to the new buttons
+            row.querySelector('.edit-button').addEventListener('click', () => editBook(book.id));
+            row.querySelector('.delete-button').addEventListener('click', () => deleteBook(book.id));
+        });
+    }
+
+    // Function to save a book (create or update)
+    async function saveBook() {
+        const book = {
+            title: titleInput.value,
+            author: authorInput.value,
+            isbn: isbnInput.value,
+            price: parseFloat(priceInput.value)
+        };
+        
+        const id = bookIdInput.value;
+        
+        try {
+            if (id) {
+                // Update existing book
+                showMessage('Updating book...');
+                await BookstoreAPI.updateBook(id, book);
+                showMessage('Book updated successfully!', 'success');
+            } else {
+                // Create new book
+                showMessage('Creating new book...');
+                await BookstoreAPI.createBook(book);
+                showMessage('Book created successfully!', 'success');
+            }
+            
+            clearForm();
+            loadBooks();
+        } catch (error) {
+            showMessage('Error saving book: ' + error.message, 'error');
+        }
+    }
+
+    // Function to edit a book
+    async function editBook(id) {
+        try {
+            showMessage('Loading book details...');
+            const book = await BookstoreAPI.getBookById(id);
+            
+            bookIdInput.value = book.id;
+            titleInput.value = book.title;
+            authorInput.value = book.author;
+            isbnInput.value = book.isbn;
+            priceInput.value = book.price;
+            
+            showMessage('Book loaded for editing', 'success');
+        } catch (error) {
+            showMessage('Error loading book: ' + error.message, 'error');
+        }
+    }
+
+    // Function to delete a book
+    async function deleteBook(id) {
+        if (confirm('Are you sure you want to delete this book?')) {
+            try {
+                showMessage('Deleting book...');
+                await BookstoreAPI.deleteBook(id);
+                loadBooks();
+                showMessage('Book deleted successfully!', 'success');
+            } catch (error) {
+                showMessage('Error deleting book: ' + error.message, 'error');
+            }
+        }
+    }
+
+    // Function to clear the form
+    function clearForm() {
+        bookIdInput.value = '';
+        titleInput.value = '';
+        authorInput.value = '';
+        isbnInput.value = '';
+        priceInput.value = '';
+    }
+
+    // Function to show messages
+    function showMessage(text, type = 'info') {
+        messageArea.textContent = text;
+        messageArea.className = type;
+        
+        // Clear message after 3 seconds
+        setTimeout(() => {
+            messageArea.textContent = '';
+            messageArea.className = '';
+        }, 3000);
+    }
+});
