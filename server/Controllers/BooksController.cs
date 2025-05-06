@@ -15,14 +15,12 @@ public class BooksController : ControllerBase
     };
     private static int _nextId = 4;
 
-    // GET: api/books
     [HttpGet]
     public ActionResult<IEnumerable<Book>> GetBooks()
     {
         return _books;
     }
 
-    // GET: api/books/5
     [HttpGet("{id}")]
     public ActionResult<Book> GetBook(int id)
     {
@@ -36,7 +34,6 @@ public class BooksController : ControllerBase
         return book;
     }
 
-    // POST: api/books
     [HttpPost]
     public ActionResult<Book> CreateBook(Book book)
     {
@@ -46,7 +43,6 @@ public class BooksController : ControllerBase
         return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
     }
 
-    // PUT: api/books/5
     [HttpPut("{id}")]
     public IActionResult UpdateBook(int id, Book book)
     {
@@ -61,14 +57,12 @@ public class BooksController : ControllerBase
             return NotFound();
         }
 
-        // Update existing book with new values
         var index = _books.IndexOf(existingBook);
         _books[index] = book;
 
         return NoContent();
     }
 
-    // DELETE: api/books/5
     [HttpDelete("{id}")]
     public IActionResult DeleteBook(int id)
     {
