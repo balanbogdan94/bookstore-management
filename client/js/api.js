@@ -1,6 +1,4 @@
-// API module for communication with the bookstore server
-
-// Base API URL - adjust if needed
+// Base API URL
 const API_URL = 'http://localhost:5000/api/books';
 
 // API functions for CRUD operations
@@ -49,26 +47,6 @@ const BookstoreAPI = {
             return await response.json();
         } catch (error) {
             console.error('Error creating book:', error);
-            throw error;
-        }
-    },
-    
-    // Update a book
-    updateBook: async function(id, book) {
-        try {
-            const response = await fetch(`${API_URL}/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(book)
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error(`Error updating book ${id}:`, error);
             throw error;
         }
     },

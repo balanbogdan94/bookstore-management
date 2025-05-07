@@ -1,8 +1,6 @@
 // Main JavaScript for the Bookstore Management UI
-
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
-    const bookForm = document.getElementById('book-form');
     const bookIdInput = document.getElementById('book-id');
     const titleInput = document.getElementById('title');
     const authorInput = document.getElementById('author');
@@ -40,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (books.length === 0) {
             const row = document.createElement('tr');
-            row.innerHTML = '<td colspan="5">No books found</td>';
+            row.innerHTML = '<td colspan="5" role="cell">No books found</td>';
             booksTableBody.appendChild(row);
             return;
         }
@@ -49,13 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = document.createElement('tr');
             
             row.innerHTML = `
-                <td>${book.title}</td>
-                <td>${book.author}</td>
-                <td>${book.isbn}</td>
-                <td>$${parseFloat(book.price).toFixed(2)}</td>
-                <td>
-                    <button class="edit-button" data-id="${book.id}">Edit</button>
-                    <button class="delete-button" data-id="${book.id}">Delete</button>
+                <td role="cell">${book.title}</td>
+                <td role="cell">${book.author}</td>
+                <td role="cell">${book.isbn}</td>
+                <td role="cell">$${parseFloat(book.price).toFixed(2)}</td>
+                <td role="cell" class="actions-cell">
+                    <button class="icon-button edit-button" data-id="${book.id}" title="Edit ${book.title}" aria-label="Edit ${book.title}"><i class="fas fa-edit" aria-hidden="true"></i></button>
+                    <button class="icon-button delete-button" data-id="${book.id}" title="Delete ${book.title}" aria-label="Delete ${book.title}"><i class="fas fa-trash" aria-hidden="true"></i></button>
                 </td>
             `;
             
@@ -100,20 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to edit a book
     async function editBook(id) {
-        try {
-            showMessage('Loading book details...');
-            const book = await BookstoreAPI.getBookById(id);
-            
-            bookIdInput.value = book.id;
-            titleInput.value = book.title;
-            authorInput.value = book.author;
-            isbnInput.value = book.isbn;
-            priceInput.value = book.price;
-            
-            showMessage('Book loaded for editing', 'success');
-        } catch (error) {
-            showMessage('Error loading book: ' + error.message, 'error');
-        }
+        alert('Editing book with ID: ' + id);
     }
 
     // Function to delete a book
@@ -139,15 +124,19 @@ document.addEventListener('DOMContentLoaded', () => {
         priceInput.value = '';
     }
 
-    // Function to show messages
+    // Function to show messages with screen reader support
     function showMessage(text, type = 'info') {
         messageArea.textContent = text;
         messageArea.className = type;
+        
+        // Ensure screen readers announce the message
+        messageArea.setAttribute('aria-live', 'assertive');
         
         // Clear message after 3 seconds
         setTimeout(() => {
             messageArea.textContent = '';
             messageArea.className = '';
+            messageArea.setAttribute('aria-live', 'polite');
         }, 3000);
     }
 });
